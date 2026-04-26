@@ -4,6 +4,35 @@
 
 let creating; // A global promise to avoid concurrency issues
 
+// Cooldown for auto-login (page load triggered only)
+const AUTO_COOLDOWN_WINDOW = 10000; // 10s
+const AUTO_COOLDOWN_DURATION = 30000; // 30s
+const AUTO_COOLDOWN_MAX_ATTEMPTS = 2;
+let autoAttemptTimestamps = [];
+let autoCooldownUntil = 0;
+
+function checkAutoCooldown() {
+  const now = Date.now();
+  autoAttemptTimestamps = autoAttemptTimestamps.filter(t => now - t < AUTO_COOLDOWN_WINDOW);
+  if (now < autoCooldownUntil) {
+    return Math.ceil((autoCooldownUntil - now) / 1000);
+  }
+  autoCooldownUntil = 0;
+  return 0;
+}
+
+function recordAutoAttempt() {
+  const now = Date.now();
+  autoAttemptTimestamps.push(now);
+  autoAttemptTimestamps = autoAttemptTimestamps.filter(t => now - t < AUTO_COOLDOWN_WINDOW);
+  if (autoAttemptTimestamps.length >= AUTO_COOLDOWN_MAX_ATTEMPTS) {
+    autoCooldownUntil = now + AUTO_COOLDOWN_DURATION;
+    autoAttemptTimestamps = [];
+    return true;
+  }
+  return false;
+}
+
 async function ensureOffscreenDocument() {
   const existingContexts = await chrome.runtime.getContexts({
     contextTypes: ['OFFSCREEN_DOCUMENT'],
@@ -80,6 +109,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true; // async
   } else if (msg.type === 'autoLogin') {
     // Full auto-login flow: fill credentials → recognize captcha → fill captcha → click login
+    const isAutoPageLoad = !msg.tabId; // triggered from content script (page load)
     const tabId = msg.tabId || (sender.tab && sender.tab.id);
 
     // If triggered from content script (auto-login on page load), use sender tab
@@ -89,8 +119,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       return;
     }
 
+    // Cooldown only for auto page-load login
+    if (isAutoPageLoad) {
+      const cooldownRemaining = checkAutoCooldown();
+      if (cooldownRemaining > 0) {
+        sendResponse({ error: `自动登录冷却中，请等待 ${cooldownRemaining} 秒` });
+        return;
+      }
+    }
+
     // Get stored credentials
     chrome.storage.local.get(['username', 'password'], (data) => {
+      if (isAutoPageLoad) recordAutoAttempt();
       if (!data.username || !data.password) {
         sendResponse({ error: '请先在扩展设置中填写用户名和密码' });
         return;

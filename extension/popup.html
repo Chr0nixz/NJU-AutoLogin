@@ -59,6 +59,29 @@
       border-color: #0284c7;
       box-shadow: 0 0 0 2px rgba(2,132,199,0.15);
     }
+    .password-wrap {
+      position: relative;
+      margin-bottom: 6px;
+    }
+    .password-wrap input {
+      margin-bottom: 0;
+      padding-right: 36px;
+    }
+    .password-toggle {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      width: auto;
+      color: #9ca3af;
+      font-size: 16px;
+      margin: 0;
+    }
+    .password-toggle:hover { color: #6b7280; background: none; }
     .checkbox-row {
       display: flex;
       align-items: center;
@@ -115,7 +138,10 @@
     <h3>NJU 自动登录</h3>
     <div class="nav-row"><a id="openSettings">设置</a></div>
     <input type="text" id="username" placeholder="用户名 / 学号" />
-    <input type="password" id="password" placeholder="密码" />
+    <div class="password-wrap">
+      <input type="password" id="password" placeholder="密码" />
+      <button type="button" class="password-toggle" id="togglePwd" title="显示/隐藏密码">👁</button>
+    </div>
     <div class="checkbox-row">
       <input type="checkbox" id="autoLogin" />
       <label for="autoLogin">页面加载时自动登录</label>

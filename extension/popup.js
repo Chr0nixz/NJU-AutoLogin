@@ -29,7 +29,20 @@ document.getElementById('password').addEventListener('change', () => {
   chrome.storage.local.set({ password: document.getElementById('password').value });
 });
 
-// One-click login (main page)
+// Password visibility toggle
+document.getElementById('togglePwd').addEventListener('click', () => {
+  const input = document.getElementById('password');
+  const btn = document.getElementById('togglePwd');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🔒';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁';
+  }
+});
+
+// One-click login (main page, no cooldown)
 document.getElementById('loginBtn').addEventListener('click', async () => {
   const btn = document.getElementById('loginBtn');
   const status = document.getElementById('status');
@@ -57,7 +70,7 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
     });
 
     if (response.error) {
-      errorEl.textContent = response.error;
+      errorEl.textContent = response.error + '，请检查用户名和密码';
       status.textContent = '登录失败';
     } else {
       status.textContent = '登录完成！';
