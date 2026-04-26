@@ -132,6 +132,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.action === 'clickLogin') {
     const ok = clickLoginButton();
     sendResponse({ ok });
+  } else if (request.action === 'autoLoginDisabled') {
+    console.log(`[NJU AutoLogin] 自动登录已被系统关闭（原因：${request.reason}）`);
   }
 });
 

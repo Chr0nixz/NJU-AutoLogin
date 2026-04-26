@@ -18,6 +18,15 @@ chrome.storage.local.get(['username', 'password', 'autoLogin'], (data) => {
   document.getElementById('autoLogin').checked = !!data.autoLogin;
 });
 
+// Sync autoLogin checkbox when popup gains focus (may have been disabled by background)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    chrome.storage.local.get(['autoLogin'], (data) => {
+      document.getElementById('autoLogin').checked = !!data.autoLogin;
+    });
+  }
+});
+
 // Auto-save settings on change
 document.getElementById('autoLogin').addEventListener('change', () => {
   chrome.storage.local.set({ autoLogin: document.getElementById('autoLogin').checked });

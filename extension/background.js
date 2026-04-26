@@ -123,7 +123,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (isAutoPageLoad) {
       const cooldownRemaining = checkAutoCooldown();
       if (cooldownRemaining > 0) {
-        sendResponse({ error: `自动登录冷却中，请等待 ${cooldownRemaining} 秒` });
+        // Auto-disable autoLogin setting when cooldown triggered
+        chrome.storage.local.set({ autoLogin: false });
+        chrome.tabs.sendMessage(targetTab, { action: 'autoLoginDisabled', reason: '冷却' });
+        sendResponse({ error: `自动登录冷却中，请等待 ${cooldownRemaining} 秒，已自动关闭自动登录` });
         return;
       }
     }
