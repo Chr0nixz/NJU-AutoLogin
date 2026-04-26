@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "NJU AutoLogin",
+  "version": "1.0.0",
+  "description": "南大统一认证自动登录（验证码识别 + 自动填入）",
+  "author": "chr0nix",
+  "permissions": ["activeTab", "scripting", "offscreen", "storage"],
+  "host_permissions": ["https://authserver.nju.edu.cn/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://authserver.nju.edu.cn/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "models/common.onnx",
+        "models/charset.json",
+        "lib/ort.wasm.min.js",
+        "lib/ort-wasm-simd-threaded.wasm",
+        "lib/ort-wasm-simd-threaded.mjs",
+        "offscreen.html"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}
