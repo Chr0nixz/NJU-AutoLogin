@@ -2,6 +2,14 @@
 
 Chrome 扩展，自动识别验证码并登录南京大学统一身份认证平台。
 
+## 技术特点
+
+- **完全离线运行** — 验证码识别在本地完成，无需调用任何外部 API，无网络延迟，无隐私泄露风险
+- **WASM 本地推理** — 基于 [onnxruntime-web](https://onnxruntime.dev/) 的 WASM 后端，在浏览器内运行 ONNX 模型推理，首次加载约 3-5 秒，后续识别毫秒级
+- **ddddocr 模型兼容** — OCR 模型与 Python [ddddocr](https://github.com/sml2h3/ddddocr) 使用同一模型文件，预处理流程（灰度 → 等比缩放 → 归一化 → NCHW）完全对齐，识别结果一致
+- **CTC 解码** — 输出经 argmax + CTC 解码（去重 + 去 blank），映射 8210 字符集，支持中文验证码
+- **Manifest V3** — 使用 Chrome 最新的 MV3 扩展架构，Service Worker + Offscreen Document 运行推理
+
 ## 安装
 
 1. 打开 Chrome，访问 `chrome://extensions/`
